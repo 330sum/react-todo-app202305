@@ -28,7 +28,7 @@ ctrl + c -> Y
 ```
 $ npm install react-icons // 아이콘
 $ npm install classnames // 클래스 add/remove 편리하게 (토글)
-$ npm install sass // scss 문번 사용
+$ npm install sass // scss 문법 사용
 $ npm install reactstrap bootstrap // 부트스트랩을 리액트스트랩으로 사용하는 거 / 근데 부트스트랩 깔려 있어야 함
 $ npm install @mui/material @emotion/react @emotion/styled // 디자인쪽
 $ npm install @mui/icons-material // 디자인쪽
