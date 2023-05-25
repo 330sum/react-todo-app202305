@@ -99,6 +99,34 @@ const TodoTemplate = () => {
         setTodos(copyArr);
     };
 
+    
+    // 상태관리의 중앙집중화!! 패치할 때도 한곳에서 할 수 있음~
+
+    // 하위컴포넌트 -> 상위컴포넌트 :  데이터 주는 방법
+    // 할 일 체크 처리 함수
+    const checkTodo = id => {
+        console.log(`체크한 Todo id: ${id}`);
+
+        const copyTodos = todos.map(todo => todo.id === id ? {... todo, done: !todo.done} : todo)
+        // todos의 맵을 돌려서 todo 하나씩 뽑아냄 (반복문)
+        // 그 4개 중에서 체크한 id와 id가 같으면 
+        // 기존의 것 그대로 가져오고, true가 나오면 뒤짐고, 안나오면 그냥 todo로 둠
+        // ... 9. 객체 구조분해 할당 보기
+        setTodos(copyTodos);
+
+        // 위 내용 풀어서 쓰면 아래와 같음
+        // const copyTodos = [...todos];
+        // for (const cTodo of copyTodos) {
+        //   if (cTodo.id === id) {
+        //     cTodo.done = !cTodo.done;
+        //   }
+        // }
+        // setTodos(copyTodos);
+
+    
+
+    };
+
 
 
 
@@ -110,7 +138,7 @@ const TodoTemplate = () => {
   return (
    <div className='TodoTemplate'>
         <TodoHeader />
-        <TodoMain todoList={todos} remove={removeTodo}/>
+        <TodoMain todoList={todos} remove={removeTodo} check={checkTodo}/>
         <TodoInput addTodo={addTodo}/>
    </div>
   )

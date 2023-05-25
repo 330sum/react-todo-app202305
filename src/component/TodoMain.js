@@ -3,7 +3,7 @@ import TodoItem from './TodoItem'
 
 import './scss/TodoMain.scss';
 
-const TodoMain = ({ todoList, remove }) => {
+const TodoMain = ({ todoList, remove, check }) => {
 // const TodoMain = (ppprops) => {
 
     // console.log(ppprops.todoList);
@@ -23,14 +23,17 @@ const TodoMain = ({ todoList, remove }) => {
 
     };
 
-// remove 받아서 todoitem에게 전달
+// remove, check 받아서 todoitem에게 전달
 
   return (
     <ul className = 'todo-list'>
         {
             // renderTodoItem()
             // 객체 하나하나가 todo임. 
-            todoList.map(todo => <TodoItem key={todo.id} item={todo} remove={remove}/>)
+            todoList.map(todo => <TodoItem key={todo.id} 
+                                            item={todo} 
+                                            remove={remove} 
+                                            check={check}/>)
         }
     </ul>
   )
