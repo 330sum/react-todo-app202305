@@ -32,11 +32,20 @@ const TodoTemplate = () => {
     ];
 
 
+    // 하위컴포넌트 -> 상위컴포넌트 :  데이터 주는 방법 (콜백함수 이용)
+    // 상위컴포넌트에서 함수 만들기 (addTodo)
+    // 받고싶은 데이터의 매개변수 만들기 (todoText)
+    // 함수를 하위컴포넌트에게 보냄- 50번라인(addTodo)
+    // TodoInput컴포넌트(하위컴포넌트)에게 todoText(매개변수)를 받아오는 함수
+    const addTodo = todoText => {
+        console.log('할일 정보 in TodoTemplate: ', todoText);
+    }
+
   return (
    <div className='TodoTemplate'>
         <TodoHeader />
         <TodoMain todoList={todos} />
-        <TodoInput />
+        <TodoInput addTodo={addTodo}/>
    </div>
   )
 }

@@ -4,7 +4,7 @@ import cn from 'classnames'
 
 import './scss/TodoInput.scss';
 
-const TodoInput = () => {
+const TodoInput = ({ addTodo }) => {
 
     // 입력창이 열리는 여부를 표현하는 상태값
     const [open, setOpen] = useState(false);
@@ -44,7 +44,9 @@ const TodoInput = () => {
         // 위는 바닐라 스러움(태그잡아오는거). 아래는 리액트스러운 방법(상태값으로하는거) (45~58번)
         e.preventDefault();
 
-        console.log(todoText);   
+        // console.log(todoText);   
+        // 상위컴포넌트에서 만든 함수를 받아서 특정시점에 콜백해서 상위컴포넌트가 원하는 값을 넣어서 주기
+        addTodo(todoText);
         
         // 입력이 끝나면 입력창 비우기
         setTodoText('');
