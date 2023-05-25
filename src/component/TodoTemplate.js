@@ -128,6 +128,17 @@ const TodoTemplate = () => {
     };
 
 
+    // props로 내려주기
+    // 체크가 안된 할 일의 개수 카운트 하기
+    const countRestTodo = () => {
+        const filterdTodos = todos.filter(todo => !todo.done)
+        // todo의 done:false인 것 만 체크
+        return filterdTodos.length;
+    };
+
+    // 위 코드 더 줄이기
+    // const countRestTodo = () => todos.filter(todo => !todo.done).length;
+
 
 
 
@@ -137,7 +148,7 @@ const TodoTemplate = () => {
 
   return (
    <div className='TodoTemplate'>
-        <TodoHeader />
+        <TodoHeader count={countRestTodo} />
         <TodoMain todoList={todos} remove={removeTodo} check={checkTodo}/>
         <TodoInput addTodo={addTodo}/>
    </div>
