@@ -30,7 +30,7 @@ const TodoMain = ({ todoList }) => {
         {
             // renderTodoItem()
             // 객체 하나하나가 todo임. 
-            todoList.map(todo => <TodoItem item={todo} />)
+            todoList.map(todo => <TodoItem key={todo.id} item={todo} />)
         }
     </ul>
   )
