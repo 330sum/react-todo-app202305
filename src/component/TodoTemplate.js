@@ -84,10 +84,33 @@ const TodoTemplate = () => {
     }, [todos]);
     // useEffect는 로그찍으려고 쓴거임. 지금 사용안함
 
+
+    // 하위컴포넌트 -> 상위컴포넌트 :  데이터 주는 방법
+    // 할 일 삭제 처리 함수
+    const removeTodo = id => {
+        console.log(`삭제대상 id: ${id}`);
+        // 휴지통 누르면 값 찍힘
+
+        // 상태값을 변경하기 위해 for문 돌려서 그 값을 찾고, 복사해서 그걸 지움
+        // 근데 너무 코드가 기니까 아래처럼 작성
+
+        const copyArr = todos.filter(todo => todo.id !== id);
+        // filter를 사용해서 'id가 다른 것만 남겨라' (filter와 map은 사본배열 줌)
+        setTodos(copyArr);
+    };
+
+
+
+
+
+
+
+
+
   return (
    <div className='TodoTemplate'>
         <TodoHeader />
-        <TodoMain todoList={todos} />
+        <TodoMain todoList={todos} remove={removeTodo}/>
         <TodoInput addTodo={addTodo}/>
    </div>
   )
