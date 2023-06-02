@@ -8,31 +8,33 @@ import './scss/TodoTemplate.scss';
 const TodoTemplate = () => {
 
     // 서버에 할일 목록(json)을 요청해서 받아와야 함
+    const API_BASE_URL = 'http://localhost:8181/api/todos';
    
 
     // todos배열을 상태관리
-    const [todos, setTodos] = useState([
-        {
-            id: 1,
-            title: '아침 산책하기',
-            done: false
-        },
-        {
-            id: 2,
-            title: '오늘 주간 신문 읽기',
-            done: true
-        },
-        {
-            id: 3,
-            title: '샌드위치 사먹기',
-            done: false
-        },
-        {
-            id: 4,
-            title: '리액트 복습하기',
-            done: false
-        },
-    ]);
+    const [todos, setTodos] = useState([]);
+    // const [todos, setTodos] = useState([
+    //     {
+    //         id: 1,
+    //         title: '아침 산책하기',
+    //         done: false
+    //     },
+    //     {
+    //         id: 2,
+    //         title: '오늘 주간 신문 읽기',
+    //         done: true
+    //     },
+    //     {
+    //         id: 3,
+    //         title: '샌드위치 사먹기',
+    //         done: false
+    //     },
+    //     {
+    //         id: 4,
+    //         title: '리액트 복습하기',
+    //         done: false
+    //     },
+    // ]);
 
     // id값 시퀀스 생성 함수
     const makeNewId = () => {
@@ -51,9 +53,9 @@ const TodoTemplate = () => {
         // console.log('할일 정보 in TodoTemplate: ', todoText);
 
         const newTodo = {
-            id: makeNewId(),
+            // id: makeNewId(),
             title: todoText,
-            done: false
+            // done: false
         };
 
         // todos.push(newTodo); // 푸쉬를 해도 안먹힘.
@@ -66,7 +68,20 @@ const TodoTemplate = () => {
         // 새로운 배열을 만들어서 이사해서 교체해야함 (성능문제는? 리액트는 성능문제가 안생기도록 useState에서 관리함)
         // setTodos(todos.concat([newTodo])); // js-study에 2-4.배열메서드 concat(): 배열연결하는 함수 복사본 나옴
         // todos는 배열인데, newTodo는 객체니까 [] 넣어야함
-        setTodos([... todos, newTodo]); // 복사해서 추가하는 형태
+
+        fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json'},
+            body: JSON.stringify(newTodo)
+        })
+        .then(res => res.json())
+        .then(json => {
+
+            setTodos(json.todos);
+        });
+
+
+        // setTodos([... todos, newTodo]); // 복사해서 추가하는 형태
     };
 
     // 정리정리------------------------------------------------------------------------------------------------
@@ -75,28 +90,51 @@ const TodoTemplate = () => {
     // -> 근데, 상태변수는 불변성을 띄기 때문에 새로운배열로 교체해주는 개념으로 가야함 
     // -> 복사해서 추가해주는 형태로 구현 (69번라인)
 
-    // 랜더링된 다음에 실행된는 함수 useEffect
+    // 화면이 랜더링된 다음에 '자동으로' 실행된는 함수 useEffect
     // useEffect안에(콜백함수()=>{}, [])
     // 리액트에서 상태변수가 아니면 유지되지 않음. 그래서 적용되지 않음(counter랑 똑같은 개념)
     // 현재 todos가 지역변수이기 때문에 상태변수로 만들어줘야함 -> // todos배열을 상태관리
-    useEffect(() => {
-        console.log(todos);
-    }, [todos]);
+    // useEffect(() => {
+    //     console.log(todos);
+    // }, [todos]);
     // useEffect는 로그찍으려고 쓴거임. 지금 사용안함
+
+    // useEffect(() => {
+    //     console.log('메롱');
+    // }, []);
+    useEffect(() => {
+        fetch(API_BASE_URL)
+            .then(res => res.json())
+            .then(json => {
+                console.log(json.todos);
+
+                setTodos(json.todos);
+            });
+    }, []);
 
 
     // 하위컴포넌트 -> 상위컴포넌트 :  데이터 주는 방법
     // 할 일 삭제 처리 함수
     const removeTodo = id => {
-        console.log(`삭제대상 id: ${id}`);
-        // 휴지통 누르면 값 찍힘
 
-        // 상태값을 변경하기 위해 for문 돌려서 그 값을 찾고, 복사해서 그걸 지움
-        // 근데 너무 코드가 기니까 아래처럼 작성
+        fetch(`${API_BASE_URL}/${id}`, {
+            method: 'DELETE'
+          })
+          .then(res => res.json())
+          .then(json => {
+            setTodos(json.todos);
+          });
+    
 
-        const copyArr = todos.filter(todo => todo.id !== id);
-        // filter를 사용해서 'id가 다른 것만 남겨라' (filter와 map은 사본배열 줌)
-        setTodos(copyArr);
+        // console.log(`삭제대상 id: ${id}`);
+        // // 휴지통 누르면 값 찍힘
+
+        // // 상태값을 변경하기 위해 for문 돌려서 그 값을 찾고, 복사해서 그걸 지움
+        // // 근데 너무 코드가 기니까 아래처럼 작성
+
+        // const copyArr = todos.filter(todo => todo.id !== id);
+        // // filter를 사용해서 'id가 다른 것만 남겨라' (filter와 map은 사본배열 줌)
+        // setTodos(copyArr);
     };
 
     
@@ -104,24 +142,36 @@ const TodoTemplate = () => {
 
     // 하위컴포넌트 -> 상위컴포넌트 :  데이터 주는 방법
     // 할 일 체크 처리 함수
-    const checkTodo = id => {
-        console.log(`체크한 Todo id: ${id}`);
+    const checkTodo = (id, done) => {
 
-        const copyTodos = todos.map(todo => todo.id === id ? {... todo, done: !todo.done} : todo)
-        // todos의 맵을 돌려서 todo 하나씩 뽑아냄 (반복문)
-        // 그 4개 중에서 체크한 id와 id가 같으면 
-        // 기존의 것 그대로 가져오고, true가 나오면 뒤짐고, 안나오면 그냥 todo로 둠
-        // ... 9. 객체 구조분해 할당 보기
-        setTodos(copyTodos);
+        fetch(API_BASE_URL, {
+            method: 'PUT',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify({
+                done: !done,
+                id: id
+            })
+        })
+        .then(res => res.json())
+        .then(json => setTodos(json.todos));
 
-        // 위 내용 풀어서 쓰면 아래와 같음
-        // const copyTodos = [...todos];
-        // for (const cTodo of copyTodos) {
-        //   if (cTodo.id === id) {
-        //     cTodo.done = !cTodo.done;
-        //   }
-        // }
+        // console.log(`체크한 Todo id: ${id}`);
+
+        // const copyTodos = todos.map(todo => todo.id === id ? {... todo, done: !todo.done} : todo)
+        // // todos의 맵을 돌려서 todo 하나씩 뽑아냄 (반복문)
+        // // 그 4개 중에서 체크한 id와 id가 같으면 
+        // // 기존의 것 그대로 가져오고, true가 나오면 뒤짐고, 안나오면 그냥 todo로 둠
+        // // ... 9. 객체 구조분해 할당 보기
         // setTodos(copyTodos);
+
+        // // 위 내용 풀어서 쓰면 아래와 같음
+        // // const copyTodos = [...todos];
+        // // for (const cTodo of copyTodos) {
+        // //   if (cTodo.id === id) {
+        // //     cTodo.done = !cTodo.done;
+        // //   }
+        // // }
+        // // setTodos(copyTodos);
 
     
 
