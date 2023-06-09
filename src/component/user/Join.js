@@ -11,11 +11,16 @@ import React, {
     Link
   } from "@mui/material";
 
-
-  import {API_BASE_URL as BASE, USER} from '../../config/host-config';
-import { json } from 'react-router-dom';
+  // 리다이렉트 사용하기
+  import { useNavigate } from 'react-router-dom';
   
+  import { API_BASE_URL as BASE, USER } from '../../config/host-config';
+  
+
   const Join = () => {
+  
+    // 리다이렉트 
+    const redirection = useNavigate();
 
     const API_BASE_URL = BASE + USER;
   
@@ -99,51 +104,71 @@ import { json } from 'react-router-dom';
   
   
     };
-
-    // 이메일 중복체크 서버통신 함수
-    const fetchDuplicateCheck = email => {
-
-        fetch(`${API_BASE_URL}/check?email=${email}`)
-            .then(res => res.json())
-            .then(json => {
-                console.log(json);
-            });
-
+  
+    // 이메일 중복체크 서버 통신 함수
+    const fetchDuplicateCheck = async (email) => {
+  
+      const res = await fetch(`${API_BASE_URL}/check?email=${email}`);
+  
+      let msg = '', flag = false;
+      if (res.status === 200) {
+        const json = await res.json();
+        console.log(json);
+        if (json) {
+          msg = '이메일이 중복되었습니다!';
+          flag = false;
+        } else {
+          msg = '사용 가능한 이메일입니다.';
+          flag = true;
+        }
+      } else {
+        alert('서버 통신이 원활하지 않습니다!');
+      }
+  
+      setUserValue({...userValue, email: email });
+      setMessage({...message, email: msg });
+      setCorrect({...correct, email: flag });
+        
     };
   
-  // 이메일 입력창 체인지 이벤트 핸들러
-  const emailHandler = e => {
-
-    const inputVal = e.target.value;
-
-    const emailRegex = /^[a-z0-9\.\-_]+@([a-z0-9\-]+\.)+[a-z]{2,6}$/;
-
-    let msg, flag;
-    if (!inputVal) {
-        msg = '이메일은 필수값입니다!';
-        flag = false;
-    } else if (!emailRegex.test(inputVal)) {
-        msg = '이메일 형식이 아닙니다!';
-        flag = false;
-    } else {
-        // 이메일 중복체크
-        fetchDuplicateCheck(inputVal);
-
-    }
-
-  };
+    // 이메일 입력창 체인지 이벤트 핸들러
+    const emailHandler = e => {
+  
+      const inputVal = e.target.value;
+  
+      const emailRegex = /^[a-z0-9\.\-_]+@([a-z0-9\-]+\.)+[a-z]{2,6}$/;
+  
+      let msg, flag;
+      if (!inputVal) {
+          msg = '이메일은 필수값입니다!';
+          flag = false;
+      } else if (!emailRegex.test(inputVal)) {
+          msg = '이메일 형식이 아닙니다!';
+          flag = false;
+      } else {
+          // 이메일 중복체크
+          fetchDuplicateCheck(inputVal);
+          return;
+      }
+  
+      saveInputState({
+        key: 'email',
+        inputVal,
+        msg,
+        flag
+      });
+  
+    };
   
     // 패스워드 입력창 체인지 이벤트 핸들러
     const passwordHandler = e => {
-
-        // 패스워드가 변동되면 확인란을 비우기
-        document.getElementById('password-check').value ='';
-        document.getElementById('check-span').textContent ='';
-
-        setMessage({...message, passwordCheck: ''});
-        setCorrect({...message, passwordCheck: false});
-        // 다시한번 그려져야함!
-
+  
+      // 패스워드가 변동되면 확인란을 비우기
+      document.getElementById('password-check').value = '';
+      document.getElementById('check-span').textContent = '';
+  
+      setMessage({...message, passwordCheck: ''});
+      setCorrect({...correct, passwordCheck: false});
   
       const inputVal = e.target.value;
   
@@ -183,7 +208,7 @@ import { json } from 'react-router-dom';
         flag = false;
       } else {
         msg = '패스워드가 일치합니다.';
-        flag = false;
+        flag = true;
       }
   
       saveInputState({
@@ -196,12 +221,53 @@ import { json } from 'react-router-dom';
     };
   
   
+    // 4개의 입력칸이 모두 검증에 통과했는지 여부를 검사
+    const isValid = () => {
+        for (const key in correct) {
+            const flag = correct[key];
+            if(!flag) return false;
+        }
+        return true;
+
+    };
+
+    // 회원가입 처리 서버 요청
+    const fetchSignUpPost = async () => {
+
+        const res = await fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: { 'content-type' : 'application/json'},
+            body: JSON.stringify(userValue)
+        });
+
+        if (res.status === 200) {
+            alert('회원가입에 성공했습니다! 축하포카!!');
+            // 로그인 페이지로 리다이렉트
+            // window.location.href = '/login'; --> 화면 깜빡임
+            // 라우터로도 할 수 있음
+            redirection('/login');
+        } else {
+            alert('서버와 통신이 원활하지 않슴ㅁㅁㅁㅁㅁ')
+        }
+
+    };
   
+    // 회원가입 버튼 클릭 이벤트 핸들러
     const joinButtonClickHandler = e => {
   
       e.preventDefault();
-  
       console.log(userValue);
+      
+      // 회원가입 서버 요청
+        if (isValid()) {
+
+            fetchSignUpPost();
+            alert('회원가입 정보를 서버에 전송합니당');
+        } else {
+            alert('입력란을 다시 확인해주세요!');
+        }
+  
+     
     };
   
   
@@ -237,10 +303,6 @@ import { json } from 'react-router-dom';
                         : {color:'red'}
                       }>{message.userName}</span>
                       {/* 문자열만 {}생략가능 다른 모든것은 {}써야한다. */}
-                      {/* 렌더링할때 쓸려면 데이터가 상태변수여야함!!!!!!!!!!!!!! */}
-                      {/* <span>{msg}</span> 이딴식으로 쓰면 안됨!!!!!!!!!!!!!!!!*/}
-                      {/* span들 태그 아님! jsx임! 자바스크립트임! 그래서 무조건 중괄호로 써야함! */}
-                      {/* 문자는 중괄호 생략가능 바깥 중괄호 jsx문번, style은 객체로 중괄호에 싸서 넣어야함! 근데 지금은 문법 넣은거~~ */}
                   </Grid>
                   <Grid item xs={12}>
                       <TextField
@@ -290,7 +352,7 @@ import { json } from 'react-router-dom';
                           autoComplete="check-password"
                           onChange={pwCheckHandler}                
                       />
-                      <span id ='check-span' style={
+                      <span id='check-span' style={
                         correct.passwordCheck
                         ?{color:'green'}
                         : {color:'red'}
