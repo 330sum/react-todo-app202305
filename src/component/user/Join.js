@@ -10,8 +10,14 @@ import React, {
     Typography,
     Link
   } from "@mui/material";
+
+
+  import {API_BASE_URL as BASE, USER} from '../../config/host-config';
+import { json } from 'react-router-dom';
   
   const Join = () => {
+
+    const API_BASE_URL = BASE + USER;
   
     // 상태변수로 회원가입 입력값 관리
     const [userValue, setUserValue] = useState({
@@ -93,18 +99,39 @@ import React, {
   
   
     };
-  
-    // 이메일 입력창 체인지 이벤트 핸들러
-    const emailHandler = e => {
-  
-      const inputVal = e.target.value;
-  
-      setUserValue({
-        ...userValue,
-        email: inputVal
-      });
-  
+
+    // 이메일 중복체크 서버통신 함수
+    const fetchDuplicateCheck = email => {
+
+        fetch(`${API_BASE_URL}/check?email=${email}`)
+            .then(res => res.json())
+            .then(json => {
+                console.log(json);
+            });
+
     };
+  
+  // 이메일 입력창 체인지 이벤트 핸들러
+  const emailHandler = e => {
+
+    const inputVal = e.target.value;
+
+    const emailRegex = /^[a-z0-9\.\-_]+@([a-z0-9\-]+\.)+[a-z]{2,6}$/;
+
+    let msg, flag;
+    if (!inputVal) {
+        msg = '이메일은 필수값입니다!';
+        flag = false;
+    } else if (!emailRegex.test(inputVal)) {
+        msg = '이메일 형식이 아닙니다!';
+        flag = false;
+    } else {
+        // 이메일 중복체크
+        fetchDuplicateCheck(inputVal);
+
+    }
+
+  };
   
     // 패스워드 입력창 체인지 이벤트 핸들러
     const passwordHandler = e => {
@@ -226,7 +253,11 @@ import React, {
                           autoComplete="email"
                           onChange={emailHandler}
                       />
-                      <span></span>
+                      <span style={
+                        correct.email
+                        ?{color:'green'}
+                        : {color:'red'}
+                      }>{message.email}</span>
                   </Grid>
                   <Grid item xs={12}>
                       <TextField
