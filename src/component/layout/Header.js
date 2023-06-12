@@ -10,7 +10,7 @@ const Header = () => {
 
     const redirection = useNavigate();
 
-    const [userInfo, setUserInfo] = useState({});
+    const [userInfo, setUserInfo] = useState(getLoginUserInfo());
 
     const { token, userName, role } = userInfo;
 
