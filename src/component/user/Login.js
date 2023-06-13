@@ -3,7 +3,7 @@ import {Grid, Button, Container, Typography, TextField} from "@mui/material";
 
 import { API_BASE_URL as BASE, USER } from '../../config/host-config';
 
-import { redirect, useNavigate } from 'react-router-dom';
+import { redirect, useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
 
@@ -115,10 +115,18 @@ const Login = () => {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            color="primary"
+                            // color="primary"
+                            style={{background: '#38d9a9'}}
                         >
                             로그인
                         </Button>
+                    </Grid>
+                    <Grid item>
+                        <Link to="/join">
+                            회원가입을 통해 서비스를 이용하세요.
+                        </Link>
+                    </Grid>
+                    <Grid container justify="flex-end">
                     </Grid>
                 </Grid>
             </form>
