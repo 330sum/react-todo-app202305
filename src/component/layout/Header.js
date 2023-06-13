@@ -27,7 +27,7 @@ const Header = () => {
     // useEffect : 첫 렌더링이 끝난 후 실행되는 함수
     useEffect(() => {
         setUserInfo(getLoginUserInfo());
-    }, [userInfo]);
+    }, []);
     // 의존성 배열
     // useEffect의 두번째 파라미더 [] 배열 (의존성 배열)
     // - 저 부분 생략 할 경우, 매 리렌더링될때마다 useEffect를 호출함
