@@ -4,10 +4,18 @@ import {Grid, Button, Container, Typography, TextField} from "@mui/material";
 import { API_BASE_URL as BASE, USER } from '../../config/host-config';
 
 import { redirect, useNavigate, Link } from 'react-router-dom';
+import { setLoginUserInfo, isLogin } from '../../util/login-util';
 
 const Login = () => {
 
     const redirection = useNavigate();
+
+    // 여러컴포넌트에서 동시에 빠꾸시키고 싶으면 privateRouter사용 (13~18라인)
+    if (isLogin()) {
+        alert('이미 로그인 중입니다.');
+        window.history.back();
+        return;
+    }
 
     const REQUEST_URL = BASE + USER + '/signin';
 
@@ -37,7 +45,7 @@ const Login = () => {
         // console.log(json);
         // alert(json);
         // alert(json.userName);
-        const { token, userName, email, role} = await res.json(); // 서버에서 온 json 읽기
+        const userInfo = await res.json(); // 서버에서 온 json 읽기
 
 
         // json에 담긴 인증정보(토큰)를 클라이언트에게 보관시킴
@@ -46,9 +54,10 @@ const Login = () => {
         // 2. 세션 스토리지 (우리가 아는 세션과 다름. 브라우저 안에 있은 클라이언트 세션) - 브라우저가 종료되면 사라짐 (일반 로그인처럼 됨)
 
         // 1. 로컬스토리지에 담는 방법 - localStorage
-        localStorage.setItem('ACCESS_TOKEN', token);
-        localStorage.setItem('LOGIN_USERNAME', userName);
-        localStorage.setItem('USER_ROLE', role);
+        // localStorage.setItem('ACCESS_TOKEN', token);
+        // localStorage.setItem('LOGIN_USERNAME', userName);
+        // localStorage.setItem('USER_ROLE', role);
+        setLoginUserInfo(userInfo);
 
         // 2. 브라우저 끄면 종료 되게 하는 방법 (세션 스토리지) - sessionStorage
         // sessionStorage.setItem('ACCESS_TOKEN', token);

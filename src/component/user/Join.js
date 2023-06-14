@@ -12,7 +12,7 @@ import React, {
   } from "@mui/material";
 
   // 리다이렉트 사용하기
-  import { useNavigate, Link } from 'react-router-dom';
+  import { useNavigate } from 'react-router-dom';
   
   import { API_BASE_URL as BASE, USER } from '../../config/host-config';
   

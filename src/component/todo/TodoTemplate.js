@@ -5,21 +5,21 @@ import TodoInput from './TodoInput'
 import { useNavigate } from 'react-router-dom'
 import { Spinner } from 'reactstrap'
 
-import { getLoginUserInfo } from '../../util/login-util'
+import { getLoginUserInfo, setLoginUserInfo } from '../../util/login-util'
 
 import './scss/TodoTemplate.scss';
 
-import {API_BASE_URL as BASE, TODO} from '../../config/host-config'
+import {API_BASE_URL as BASE, TODO, USER} from '../../config/host-config'
 
 const TodoTemplate = () => {
 
     // 로딩 상태값 관리
+    const [ token, setToken ]  = useState(getLoginUserInfo().token);
     const [ loading, setLoading ] = useState(true);
 
     const redirection = useNavigate();
 
     // 로그인 인증 토큰 얻어오기
-    const { token } = getLoginUserInfo();
     // 같은 말 : const token = getLoginUserInfo().token;
 
     // 요청 헤더 설정
@@ -31,6 +31,7 @@ const TodoTemplate = () => {
     // 서버에 할일 목록(json)을 요청해서 받아와야 함
     // const API_BASE_URL = 'http://localhost:8181/api/todos';
     const API_BASE_URL = BASE + TODO;
+    const API_USER_URL = BASE + USER;
    
 
     // todos배열을 상태관리
@@ -97,15 +98,55 @@ const TodoTemplate = () => {
             // headers: { 'content-type': 'application/json'},
             body: JSON.stringify(newTodo)
         })
-        .then(res => res.json())
+        .then(res => {
+            if(res.status === 200 ) return res.json();
+            else if (res.status === 401) {
+                alert ('일반회원은 일정등록이 5개로 제한됩니다 ㅠㅠ! 지금 당장 가입하세요!');
+            }
+        })
         .then(json => {
-
-            setTodos(json.todos);
+            json && setTodos(json.todos); // json && : 제이슨 존재할때만 setTodo해라
         });
 
 
         // setTodos([... todos, newTodo]); // 복사해서 추가하는 형태
     };
+
+    // ajax 등급승격 함수
+    const fetchPromote = async() => {
+        const res = await fetch(API_USER_URL + '/promote', {
+            method: 'PUT',
+            headers: requestHeader
+        });
+
+        if (res.status === 403) { //일반회원 아닌애가 등급신청함
+            alert('이미 프리미엄 회원이거나 관리자입니다.')
+
+        } else if (res.status === 200) {
+            const json  = await res.json();
+            console.log(json); // json - 재발급 토큰
+            // 토큰 갱신
+            setLoginUserInfo(json);
+            setToken(json.token);
+        }
+    };
+
+
+
+    // 프리미엄등급 승격처리 -> 서버 요청
+    const promote = () => {
+        console.log('등급 승격 서버 요청!!!!!');
+        fetchPromote();
+    };
+
+
+
+
+
+
+
+
+
 
     // 정리정리------------------------------------------------------------------------------------------------
     // 지역변수는 값을 유지 못함. 값유지시키려면 상태변수를 써야함
@@ -237,7 +278,7 @@ const TodoTemplate = () => {
     // 로딩이 끝난 후 보여 줄 컴포넌트
     const loadEndedPage = (
         <div className='TodoTemplate'>
-            <TodoHeader count={countRestTodo} />
+            <TodoHeader count={countRestTodo} promote={promote} />
             <TodoMain todoList={todos} remove={removeTodo} check={checkTodo}/>
             <TodoInput addTodo={addTodo}/>
         </div>
