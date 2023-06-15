@@ -16,6 +16,9 @@ const Header = () => {
     // 프로필 이미지url 상태변수
     const [profileUrl, setProfileUrl] = useState(null);
 
+     // 로그인 상태를 나타내는 상태변수를 추가
+    const [isLoggedIn, setIsLoggedIn] = useState(isLogin()); 
+
     const [userInfo, setUserInfo] = useState(getLoginUserInfo());
 
     const { token, userName, role } = userInfo;
@@ -24,36 +27,43 @@ const Header = () => {
     // 로컬스토리지 다 지우고 리다이렉트하면 됨
     const logoutHandler = e => {
         localStorage.clear();
+        setProfileUrl(null);
         redirection('/login');
     };
 
 
-    const fetchProfileImage = async() => {
-        const res = await fetch(profileRequestURL, {
-            method: 'GET',
-            headers: {'Authorization' : 'Bearer ' + getLoginUserInfo().token}
-        });
-
-        if (res.status === 200) {
-            // 서버에서 직렬화된 이미지가 응답된다.
-           const profileBlob = await res.blob();
-           // 해당 이미지를 imgUrl로 변경
-           const imgUrl = window.URL.createObjectURL(profileBlob);
-           setProfileUrl(imgUrl);
-        }else {
-            const err = await res.text();
-            setProfileUrl(null);
-        }
-
-    };
+     // 로그인 상태 변화를 감지하는 useEffect를 추가
+     useEffect(() => {
+        setIsLoggedIn(isLogin());
+    }, [isLogin()]);
 
 
-    // useEffect : 첫 렌더링이 끝난 후 실행되는 함수
+
     useEffect(() => {
-        // setUserInfo(getLoginUserInfo());
-        fetchProfileImage();
+    
+        isLoggedIn &&
+        (async() => {
+    
+            const res = await fetch(profileRequestURL, {
+                method: 'GET',
+                headers: {'Authorization' : 'Bearer ' + getLoginUserInfo().token}
+            });
 
-    });
+            if (res.status === 200) {
+                // 서버에서 직렬화된 이미지가 응답된다.
+            const profileBlob = await res.blob();
+            // 해당 이미지를 imgUrl로 변경
+            const imgUrl = window.URL.createObjectURL(profileBlob);
+            setProfileUrl(imgUrl);
+            }else {
+                const err = await res.text();
+                setProfileUrl(null);
+            }
+
+        })();
+    }, [isLoggedIn]);
+
+
     // 의존성 배열
     // useEffect의 두번째 파라미더 [] 배열 (의존성 배열)
     // - 저 부분 생략 할 경우, 매 리렌더링될때마다 useEffect를 호출함
