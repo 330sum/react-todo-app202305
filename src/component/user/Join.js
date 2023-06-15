@@ -1,6 +1,6 @@
 import React, {
     useEffect,
-    useState
+    useState, useRef
   } from 'react';
   import {
     Button,
@@ -15,9 +15,14 @@ import React, {
   import { useNavigate } from 'react-router-dom';
   
   import { API_BASE_URL as BASE, USER } from '../../config/host-config';
+  import './Join.scss';
   
 
   const Join = () => {
+
+    // useRef로 태그 참조하기
+    const $fileTag = useRef();
+
   
     // 리다이렉트 
     const redirection = useNavigate();
@@ -220,6 +225,23 @@ import React, {
   
     };
   
+    // 이미지 파일 상태변수
+    const [imgFile, setImgFile] = useState(null);
+
+    // 이미지파일을 선택했을 때 썸네일 뿌리는 핸들러
+    const showThumbnailHandler = e => {
+      // 첨부된 파일 정보
+      const file = $fileTag.current.files[0];
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onloadend = () => {
+        setImgFile(reader.result);
+      }
+    };
+
+
   
     // 4개의 입력칸이 모두 검증에 통과했는지 여부를 검사
     const isValid = () => {
@@ -234,10 +256,27 @@ import React, {
     // 회원가입 처리 서버 요청
     const fetchSignUpPost = async () => {
 
+      // 이미지파일과 회원정보를 JSON하나로 묶어야 함 FormData 라는 객체 사용
+      // 근데 JSON은 Blob타입으로 안바꾸면 못넣음 FormData가 바이트스트림을 타기위해서 직렬화 시켜야함
+      // 원래 fetch에서 직렬화 자동으로 해주는데
+      // 폼데이타타면 수동으로 직렬화해줘야하마
+      const userJsonBlob = new Blob([JSON.stringify(userValue)], { type: 'applecation/json' });
+
+      const userFormData = new FormData();
+      // userFormData.append('user', JSON.stringify(userValue)); // FormData에는 JSON 못담음 259번라인으로
+      userFormData.append('user', userJsonBlob); // 'user', 'profileImage'는 DTO변수명이랑 맞춰야함
+      userFormData.append('profileImage', $fileTag.current.files[0]);
+      // $fileTag.current.files[0]: input태그 -> properties -> files 열어보기
+
+
         const res = await fetch(API_BASE_URL, {
             method: 'POST',
-            headers: { 'content-type' : 'application/json'},
-            body: JSON.stringify(userValue)
+            // headers: { 'content-type' : 'application/json'},
+            // body: JSON.stringify(userValue)
+            // 이미지 추가해서 보내려면 묶어줘야함 form-data개념으로
+            // 헤더에는 이미지와 'content-type' : 'application/json' 이렇게 같이 못보내서 헤더 사용하지말고 FormData라는 걸 사용해서 body에 실어서보내야함 265번라인 ㄱㄱ
+            // 단, 인증이 필요하면 헤더에 authorization은 헤더에 담아서 보내야함
+            body: userFormData
         });
 
         if (res.status === 200) {
@@ -285,6 +324,30 @@ import React, {
                           계정 생성
                       </Typography>
                   </Grid>
+
+                  <Grid item xs={12}>
+                    <div className="thumbnail-box" onClick={() => $fileTag.current.click()}>
+                        <img
+                          // src={require('../../assets/img/image-add.png')}
+                          src={imgFile ? imgFile : require('../../assets/img/image-add.png')}
+                          // src={imgFile || require('../../assets/img/image-add.png')}
+                          // || 왼쪽 실행
+                          // && 오른쪽 실행 (if)
+                          alt="profile"
+                        />
+                    </div>
+                    <label className='signup-img-label' htmlFor='profile-img'>프로필 이미지 추가</label>
+                    <input
+                        id='profile-img'
+                        type='file'
+                        style={{display: 'none'}}
+                        accept='image/*'
+                        ref={$fileTag}
+                        onChange={showThumbnailHandler}
+                    />
+                  </Grid>
+
+
                   <Grid item xs={12}>
                       <TextField
                           autoComplete="fname"
