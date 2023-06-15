@@ -5,10 +5,16 @@ import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { isLogin, getLoginUserInfo } from '../../util/login-util';
+import { API_BASE_URL, USER } from '../../config/host-config';
 
 const Header = () => {
+    
+    const profileRequestURL = `${API_BASE_URL}${USER}/load-profile`;
 
     const redirection = useNavigate();
+
+    // 프로필 이미지url 상태변수
+    const [profileUrl, setProfileUrl] = useState(null);
 
     const [userInfo, setUserInfo] = useState(getLoginUserInfo());
 
@@ -22,12 +28,32 @@ const Header = () => {
     };
 
 
+    const fetchProfileImage = async() => {
+        const res = await fetch(profileRequestURL, {
+            method: 'GET',
+            headers: {'Authorization' : 'Bearer ' + getLoginUserInfo().token}
+        });
+
+        if (res.status === 200) {
+            // 서버에서 직렬화된 이미지가 응답된다.
+           const profileBlob = await res.blob();
+           // 해당 이미지를 imgUrl로 변경
+           const imgUrl = window.URL.createObjectURL(profileBlob);
+           setProfileUrl(imgUrl);
+        }else {
+            const err = await res.text();
+            setProfileUrl(null);
+        }
+
+    };
 
 
     // useEffect : 첫 렌더링이 끝난 후 실행되는 함수
     useEffect(() => {
-        setUserInfo(getLoginUserInfo());
-    }, []);
+        // setUserInfo(getLoginUserInfo());
+        fetchProfileImage();
+
+    });
     // 의존성 배열
     // useEffect의 두번째 파라미더 [] 배열 (의존성 배열)
     // - 저 부분 생략 할 경우, 매 리렌더링될때마다 useEffect를 호출함
@@ -58,7 +84,21 @@ const Header = () => {
                                     : '오늘'
                                 }
                                 의 할일
-                            </Typography>   
+                            </Typography> 
+                            <img
+                                src = {profileUrl || require('../../assets/img/anonymous.jpg')}
+                                alt = '프사'
+                                style={
+                                    {
+                                        marginLeft: 20,
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: '50%'
+                                    }
+                                }
+                            
+                            />
+                                
                         </div>
                     </Grid>
 
