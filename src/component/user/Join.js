@@ -259,8 +259,8 @@ import React, {
       // 이미지파일과 회원정보를 JSON하나로 묶어야 함 FormData 라는 객체 사용
       // 근데 JSON은 Blob타입으로 안바꾸면 못넣음 FormData가 바이트스트림을 타기위해서 직렬화 시켜야함
       // 원래 fetch에서 직렬화 자동으로 해주는데
-      // 폼데이타타면 수동으로 직렬화해줘야하마
-      const userJsonBlob = new Blob([JSON.stringify(userValue)], { type: 'applecation/json' });
+      // 폼데이타타면 수동으로 직렬화해줘야만 함!
+      const userJsonBlob = new Blob([JSON.stringify(userValue)], { type: 'application/json' });
 
       const userFormData = new FormData();
       // userFormData.append('user', JSON.stringify(userValue)); // FormData에는 JSON 못담음 259번라인으로
