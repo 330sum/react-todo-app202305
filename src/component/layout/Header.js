@@ -6,10 +6,12 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { isLogin, getLoginUserInfo } from '../../util/login-util';
 import { API_BASE_URL, USER } from '../../config/host-config';
+import { Start } from '@mui/icons-material';
 
 const Header = () => {
     
-    const profileRequestURL = `${API_BASE_URL}${USER}/load-profile`;
+     // const profileRequestURL = `${API_BASE_URL}${USER}/load-profile`;
+    const profileRequestURL = `${API_BASE_URL}${USER}/load-s3`;
 
     const redirection = useNavigate();
 
@@ -35,7 +37,7 @@ const Header = () => {
      // 로그인 상태 변화를 감지하는 useEffect를 추가
      useEffect(() => {
         setIsLoggedIn(isLogin());
-    }, [isLogin()]);
+    });
 
 
 
@@ -49,12 +51,19 @@ const Header = () => {
                 headers: {'Authorization' : 'Bearer ' + getLoginUserInfo().token}
             });
 
+
             if (res.status === 200) {
-                // 서버에서 직렬화된 이미지가 응답된다.
-            const profileBlob = await res.blob();
-            // 해당 이미지를 imgUrl로 변경
-            const imgUrl = window.URL.createObjectURL(profileBlob);
-            setProfileUrl(imgUrl);
+                // 서버에서 s3 url이 응답된다
+                const imgUrl = await res.text();
+                setProfileUrl(imgUrl);
+
+            // if (res.status === 200) {
+            //     // 서버에서 직렬화된 이미지가 응답된다.
+            // const profileBlob = await res.blob();
+            // // 해당 이미지를 imgUrl로 변경
+            // const imgUrl = window.URL.createObjectURL(profileBlob);
+            // setProfileUrl(imgUrl);
+
             }else {
                 const err = await res.text();
                 setProfileUrl(null);
